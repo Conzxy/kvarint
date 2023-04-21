@@ -38,8 +38,8 @@ DEF_ENCODE_FUNC2_(64)
       *out |= ((uint64_t)(buf8[idx] & 0x7f)) << shift;                         \
       shift += 7;                                                              \
       if (!(buf8[idx] & 0x80)) return KVARINT_OK;                              \
-      ++idx;                                                                   \
       if (shift > 63) return KVARINT_DECODE_BUF_INVALID;                       \
+      ++idx;                                                                   \
     }                                                                          \
                                                                                \
     return KVARINT_DECODE_BUF_SHORT;                                           \
