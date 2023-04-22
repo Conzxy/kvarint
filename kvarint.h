@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
   KVARINT_OK = 0,
   KVARINT_DECODE_BUF_SHORT,
@@ -38,5 +42,9 @@ KVARINT_DECL_ENCODE_FUNC_(64);
 KVARINT_DECL_ENCODE_FUNC_(32);
 KVARINT_DECL_ENCODE_FUNC_(16);
 KVARINT_DECL_ENCODE_FUNC_(8);
+
+#ifdef __cplusplus
+} //! extern "C"
+#endif
 
 #endif // !_KVARINT_H__
