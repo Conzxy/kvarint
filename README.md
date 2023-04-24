@@ -51,15 +51,15 @@ kvarint_buf8_t
 
 ### Decode
 ```c
-kvarint_errcode_en kvarint_decode64(void const *buf, size_t buf_size, uint64_t *out);
-kvarint_errcode_en kvarint_decode32(void const *buf, size_t buf_size, uint32_t *out);
-kvarint_errcode_en kvarint_decode16(void const *buf, size_t buf_size, uint16_t *out);
-kvarint_errcode_en kvarint_decode8(void const *buf, size_t buf_size, uint8_t *out);
+kvarint_errcode_en kvarint_decode64(void const *buf, size_t buf_size, size_t *out_len, uint64_t *out);
+kvarint_errcode_en kvarint_decode32(void const *buf, size_t buf_size, size_t *out_len, uint32_t *out);
+kvarint_errcode_en kvarint_decode16(void const *buf, size_t buf_size, size_t *out_len, uint16_t *out);
+kvarint_errcode_en kvarint_decode8 (void const *buf, size_t buf_size, size_t *out_len, uint8_t *out);
 
-kvarint_errcode_en kvarint_decode64s(void const *buf, size_t buf_size, int64_t *out);
-kvarint_errcode_en kvarint_decode32s(void const *buf, size_t buf_size, int32_t *out);
-kvarint_errcode_en kvarint_decode16s(void const *buf, size_t buf_size, int16_t *out);
-kvarint_errcode_en kvarint_decode8s(void const *buf, size_t buf_size, int8_t *out);
+kvarint_errcode_en kvarint_decode64s(void const *buf, size_t buf_size, size_t *out_len, int64_t *out);
+kvarint_errcode_en kvarint_decode32s(void const *buf, size_t buf_size, size_t *out_len, int32_t *out);
+kvarint_errcode_en kvarint_decode16s(void const *buf, size_t buf_size, size_t *out_len, int16_t *out);
+kvarint_errcode_en kvarint_decode8s (void const *buf, size_t buf_size, size_t *out_len, int8_t *out);
 ```
 需要用户提供缓冲的大小以便检测错误。  
 错误码有以下几种：

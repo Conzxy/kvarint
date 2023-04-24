@@ -25,10 +25,11 @@ DEF_ENCODE_FUNC2_(32)
 DEF_ENCODE_FUNC2_(64)
 
 #define DEF_DECODE_FUNC_(bits_)                                                \
-  kvarint_errcode_en kvarint_decode##bits_(void const *buf, size_t len,        \
-                                           uint##bits_##_t *out)               \
+  kvarint_errcode_en kvarint_decode##bits_(                                    \
+      void const *buf, size_t len, size_t *out_len, uint##bits_##_t *out)      \
   {                                                                            \
     assert(out);                                                               \
+    assert(out_len);                                                           \
                                                                                \
     int idx = 0;                                                               \
     uint8_t const *buf8 = (uint8_t const *)buf;                                \
@@ -37,7 +38,10 @@ DEF_ENCODE_FUNC2_(64)
     while (idx < len) {                                                        \
       *out |= ((uint64_t)(buf8[idx] & 0x7f)) << shift;                         \
       shift += 7;                                                              \
-      if (!(buf8[idx] & 0x80)) return KVARINT_OK;                              \
+      if (!(buf8[idx] & 0x80)) {                                               \
+        out_len = idx + 1;                                                     \
+        return KVARINT_OK;                                                     \
+      }                                                                        \
       if (shift > 63) return KVARINT_DECODE_BUF_INVALID;                       \
       ++idx;                                                                   \
     }                                                                          \

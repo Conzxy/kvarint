@@ -19,8 +19,8 @@ typedef enum {
 } kvarint_errcode_en;
 
 #define KVARINT_DECL_DECODE_FUNC_(bits_)                                       \
-  kvarint_errcode_en kvarint_decode##bits_(void const *buf, size_t buf_size,   \
-                                           uint##bits_##_t *out)
+  kvarint_errcode_en kvarint_decode##bits_(                                    \
+      void const *buf, size_t buf_size, size_t *out_len, uint##bits_##_t *out)
 
 KVARINT_DECL_DECODE_FUNC_(64);
 KVARINT_DECL_DECODE_FUNC_(32);
@@ -29,7 +29,7 @@ KVARINT_DECL_DECODE_FUNC_(8);
 
 #define KVARINT_DECL_DECODE_FUNC_SIGNED_(bits_)                                \
   INLINE kvarint_errcode_en kvarint_decode##bits_##s(                          \
-      void const *buf, size_t buf_size, int##bits_##_t *out)                   \
+      void const *buf, size_t buf_size, size_t *out_len, int##bits_##_t *out)  \
   {                                                                            \
     /* Explain this to uint_*_t * to avoid right shift be a arithemetic shift  \
      * that leave the most significant bit(MSB) no change.                     \
@@ -38,7 +38,7 @@ KVARINT_DECL_DECODE_FUNC_(8);
      * 0, we must be also ensure the right shift operation be a logic shift.   \
      */                                                                        \
     auto p = (uint##bits_##_t *)out;                                           \
-    const auto ret = kvarint_decode##bits_(buf, buf_size, p);                  \
+    const auto ret = kvarint_decode##bits_(buf, buf_size, out_len, p);         \
                                                                                \
     /* *p = (p is odd) ? (*p+1) / 2 : p / 2; */                                \
     *p = (*p & 1) ? ~((*p - 1) >> 1) : (*p >> 1);                              \
