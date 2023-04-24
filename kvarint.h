@@ -37,8 +37,9 @@ KVARINT_DECL_DECODE_FUNC_(8);
      * since encode use left shift, it is a logic shift that fill the MSB with \
      * 0, we must be also ensure the right shift operation be a logic shift.   \
      */                                                                        \
-    auto p = (uint##bits_##_t *)out;                                           \
-    const auto ret = kvarint_decode##bits_(buf, buf_size, out_len, p);         \
+    uint##bits_##_t *p = (uint##bits_##_t *)out;                               \
+    const kvarint_errcode_en ret =                                             \
+        kvarint_decode##bits_(buf, buf_size, out_len, p);                      \
                                                                                \
     /* *p = (p is odd) ? (*p+1) / 2 : p / 2; */                                \
     *p = (*p & 1) ? ~((*p - 1) >> 1) : (*p >> 1);                              \
