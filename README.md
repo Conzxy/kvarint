@@ -26,6 +26,11 @@ void kvarint_encode64(uint64_t num, kvarint_buf64_t *buf);
 void kvarint_encode32(uint32_t num, kvarint_buf32_t *buf);
 void kvarint_encode16(uint16_t num, kvarint_buf16_t *buf);
 void kvarint_encode8(uint8_t num, kvarint_buf8_t *buf);
+
+void kvarint_encode64s(int64_t num, kvarint_buf64_t *buf);
+void kvarint_encode32s(int32_t num, kvarint_buf32_t *buf);
+void kvarint_encode16s(int16_t num, kvarint_buf16_t *buf);
+void kvarint_encode8s(int8_t num, kvarint_buf8_t *buf);
 ```
 由于用户不需要知晓varint的具体编码原理，当然也不需要知晓多大的 **缓冲(buffer)** 才合适，这个有一个库定义的缓冲结构体负责：
 ```c
@@ -50,6 +55,11 @@ kvarint_errcode_en kvarint_decode64(void const *buf, size_t buf_size, uint64_t *
 kvarint_errcode_en kvarint_decode32(void const *buf, size_t buf_size, uint32_t *out);
 kvarint_errcode_en kvarint_decode16(void const *buf, size_t buf_size, uint16_t *out);
 kvarint_errcode_en kvarint_decode8(void const *buf, size_t buf_size, uint8_t *out);
+
+kvarint_errcode_en kvarint_decode64s(void const *buf, size_t buf_size, int64_t *out);
+kvarint_errcode_en kvarint_decode32s(void const *buf, size_t buf_size, int32_t *out);
+kvarint_errcode_en kvarint_decode16s(void const *buf, size_t buf_size, int16_t *out);
+kvarint_errcode_en kvarint_decode8s(void const *buf, size_t buf_size, int8_t *out);
 ```
 需要用户提供缓冲的大小以便检测错误。  
 错误码有以下几种：
