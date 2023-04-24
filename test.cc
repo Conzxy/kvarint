@@ -60,10 +60,10 @@ TEST(kvarint, encode_and_decode_large_data_sign)
   int64_t N = 1000000;
   std::uniform_int_distribution<int64_t> uid(-INT64_MAX, INT64_MAX);
   std::default_random_engine dre(time(NULL));
-  for (uint64_t i = 0; i < N; ++i) {
+  for (int64_t i = -N; i < 0; ++i) {
     auto r = uid(dre);
     kvarint_encode64s(r, &buf);
     kvarint_decode64s(buf.buf, buf.len, &out);
-    ASSERT_EQ(r, out);
+    ASSERT_EQ(r, out) << "i = " << i;
   }
 }
