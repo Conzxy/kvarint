@@ -3,17 +3,39 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+#include "./endian_api.h"
+
+inline static bool is_machine_litte_endian()
+{
+  static int n = 1;
+  return (*(char *)&n == 1);
+}
 
 #define DEF_ENCODE_FUNC_(bits_, num_t_, buf_t_)                                                    \
   void kvarint_encode##bits_(num_t_ num, buf_t_ *buf)                                              \
   {                                                                                                \
     int idx = 0;                                                                                   \
-    while (num > 127) {                                                                            \
-      buf->buf[idx++] = 0x80 | ((uint8_t)num & 0x7f);                                              \
-      num             >>= 7;                                                                       \
+    if (!is_machine_litte_endian()) {                                                              \
+      idx = sizeof(buf->buf) - 1;                                                                  \
+      while (num > 127) {                                                                          \
+        buf->buf[idx--] = 0x80 | ((uint8_t)num & 0x7f);                                            \
+        num             >>= 7;                                                                     \
+      }                                                                                            \
+      buf->buf[idx]                  = 0x80 | num;                                                 \
+      buf->buf[sizeof(buf->buf) - 1] &= 0x7f;                                                      \
+      buf->len                       = sizeof(buf->buf) - idx;                                     \
+      memmove(buf->buf, &buf->buf[idx], buf->len);                                                 \
+    } else {                                                                                       \
+      while (num > 127) {                                                                          \
+        buf->buf[idx++] = 0x80 | ((uint8_t)num & 0x7f);                                            \
+        num             >>= 7;                                                                     \
+      }                                                                                            \
+      buf->buf[idx] = num;                                                                         \
+      buf->len      = idx + 1;                                                                     \
     }                                                                                              \
-    buf->buf[idx] = num;                                                                           \
-    buf->len      = idx + 1;                                                                       \
   }
 
 #define DEF_ENCODE_FUNC2_(bits_) DEF_ENCODE_FUNC_(bits_, uint##bits_##_t, kvarint_buf##bits_##_t)
@@ -45,12 +67,14 @@ DEF_ENCODE_FUNC2_(64)
       shift += 7;                                                                                  \
       if (!(buf8[idx] & 0x80)) {                                                                   \
         *out_len = idx + 1;                                                                        \
+        if (!is_machine_litte_endian()) {                                                          \
+          *out = kvarint_ToNetworkByteOrder64(*out);                                               \
+        }                                                                                          \
         return KVARINT_OK;                                                                         \
       }                                                                                            \
       if (shift > 63) return KVARINT_DECODE_BUF_INVALID;                                           \
       ++idx;                                                                                       \
     }                                                                                              \
-                                                                                                   \
     return KVARINT_DECODE_BUF_SHORT;                                                               \
   }
 

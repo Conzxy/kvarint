@@ -3,7 +3,6 @@
 #define _KVARINT_H__
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "macro.h"
@@ -70,7 +69,7 @@ KVARINT_DEF_BUF_STRUCT_(16, 3);
 KVARINT_DEF_BUF_STRUCT_(8, 1);
 
 #define KVARINT_DECL_ENCODE_FUNC_(bits_)                                                           \
-  void kvarint_encode##bits_(uint##bits_##_t num, kvarint_buf##bits_##_t *buf)
+  void kvarint_encode##bits_(uint##bits_##_t num, kvarint_buf##bits_##_t *buf);
 
 KVARINT_DECL_ENCODE_FUNC_(64);
 KVARINT_DECL_ENCODE_FUNC_(32);
