@@ -20,7 +20,7 @@
 
 ## API
 均提供64/32/16/8 bits版本的API。  
-注意：8 bits版本的API实际啥都没干，因为8 bits本来就可以用1个字节存储，是最小的存储单元了，没必要用2个字节存储 `[128, 255]` 的数据。  
+注意：8 bits版本的API实际并没有按照varint进行解编码，因为8 bits本来就可以用1个字节存储，是最小的存储单元了，没必要用2个字节存储 `[128, 255]` 的数据。  
 ### Encode
 ```c
 void kvarint_encode64(uint64_t num, kvarint_buf64_t *buf);
