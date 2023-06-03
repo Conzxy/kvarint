@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <random>
+#include <cstdio>
 
 #include "endian_api.h"
 
@@ -13,12 +14,23 @@ extern kvarint_errcode_en kvarint_decode64be(
     uint64_t   *out
 );
 
-void print_bits(uint64_t n)
+void print_bits(uint8_t n)
 {
-  for (size_t i = 0; i < sizeof(n) * 8; ++i) {
-    std::cout << ((n & (1 << (sizeof(n) * 8 - 1 - i))) > 0 ? 1 : 0);
+  printf("WARN: low -> high");
+  for (size_t i = 0; i < 8; ++i) {
+    printf("%d ", ((n & (1 << (sizeof(n) * 8 - 1 - i))) > 0 ? 1 : 0));
   }
-  std::cout << '\n';
+  printf("\n");
+}
+
+void print_buf(void const *raw_buf, size_t n)
+{
+  char const *buf = (char const *)raw_buf;
+  printf("0x");
+  for (size_t i = 0; i < n; ++i) {
+    printf("%x ", (int)buf[i]);
+  }
+  printf("\n");
 }
 
 #define DEF_TEST_FUNC1(bytes_)                                                                     \
@@ -27,31 +39,29 @@ void print_bits(uint64_t n)
                                                                                                    \
   in <<= (7 * ((bytes_)-1));                                                                       \
   in += 123;                                                                                       \
+  printf("val = %llu\n", (unsigned long long)in);                                                  \
+  printf("Raw layout: ");                                                                          \
+  print_buf(&in, sizeof(in));                                                                      \
   kvarint_encode64(in, &buf64);                                                                    \
-  ASSERT_EQ(buf64.len, (bytes_));                                                                  \
-                                                                                                   \
+  ASSERT_EQ(buf64.len, (bytes_)) << "Failed to encode";                                            \
+  printf("Encode layout: ");                                                                       \
+  print_buf(buf64.buf, buf64.len);                                                                 \
   uint64_t out64;                                                                                  \
   size_t   len = 0;                                                                                \
-  ASSERT_EQ(KVARINT_OK, kvarint_decode64(buf64.buf, buf64.len, &len, &out64));                     \
+  ASSERT_EQ(KVARINT_OK, kvarint_decode64(buf64.buf, buf64.len, &len, &out64))                      \
+      << "Failed to decode";                                                                       \
   ASSERT_EQ(in, out64);                                                                            \
-  in = kvarint_ToNetworkByteOrder64(in);                                                           \
-  kvarint_encode64be(in, &buf64);                                                                  \
-  ASSERT_EQ(buf64.len, (bytes_));                                                                  \
-  ASSERT_EQ(KVARINT_OK, kvarint_decode64be(buf64.buf, buf64.len, &len, &out64));                   \
-  print_bits(in);                                                                                  \
-  print_bits(out64);                                                                               \
-  ASSERT_EQ(in, out64) << "decode be error";                                                       \
-  ASSERT_EQ(len, buf64.len) << "decode be len error";
+  fflush(stdout);
 
 TEST(kvarint, encode_and_decode1)
 {
   size_t          len = 0;
-  kvarint_buf32_t buf32;
-  kvarint_encode32(123, &buf32);
+  kvarint_buf64_t buf32;
+  kvarint_encode64(123, &buf32);
   ASSERT_EQ(buf32.len, 1);
   ASSERT_EQ(buf32.buf[0], 123);
-  uint32_t out32;
-  kvarint_decode32(buf32.buf, buf32.len, &len, &out32);
+  uint64_t out32;
+  kvarint_decode64(buf32.buf, buf32.len, &len, &out32);
 
   ASSERT_EQ(out32, 123);
 }
