@@ -15,7 +15,8 @@
 当然，其实对于浮点数也是可以用的，毕竟都是bits罢了。
 
 ### Byte order
-对于字节序，编码是大端/小端，解码也是大端/小端，所以不需要担心这个库会转换字节序而带来心理负担。
+该库已经自动处理好了字节序的转换，因此用户并不需要关心字节序的转化。  
+如果你硬是塞了转化好字节序的内容，可能会得到不符合预期的结果，该库并不负责。
 
 ## API
 均提供64/32/16/8 bits版本的API。
@@ -77,3 +78,12 @@ typedef enum {
 ```
 $ g++ -g -o test test.cc kvarint.c -lgtest -lgtest_main
 ```
+
+大端序的测试可以通过 `qemu` 或 `docker`[1] 进行虚拟环境的模拟：
+```shell
+$ docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+$ docker run --rm -it s390x/ubuntu bash
+```
+
+## Reference
+[1] https://stackoverflow.com/a/3339484
