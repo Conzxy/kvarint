@@ -8,37 +8,50 @@
 
 #include "./endian_api.h"
 
+/*
+ * You should know before read following:
+ * BE = Big endian
+ * LE = little endian
+ *
+ * To handle the encode and decode in BE environment, follow a common byte order in buffer.
+ * To most machine is LE, I determine the common byte order be LE.
+ * So encode in BE env must convert it to LE, and decode in BE env must convert it to BE.
+ *
+ * Solution:
+ * To former, put the highest byte(ie. lowest byte in LE) to buffer in order.
+ * To latter, convert the buffer to a integer then convert it to BE.
+ */
 inline static bool is_machine_litte_endian()
 {
   static int n = 1;
   return (*(char *)&n == 1);
 }
 
-#define DEF_ENCODE_FUNC_(bits_, num_t_, buf_t_)                                                    \
+#define DEF_ENCODE_FUNC_(index_, bits_, num_t_, buf_t_)                                            \
   void kvarint_encode##bits_(num_t_ num, buf_t_ *buf)                                              \
   {                                                                                                \
     int idx = 0;                                                                                   \
-    if (!is_machine_litte_endian()) {                                                              \
-      idx = sizeof(buf->buf) - 1;                                                                  \
-      while (num > 127) {                                                                          \
-        buf->buf[idx--] = 0x80 | ((uint8_t)num & 0x7f);                                            \
-        num             >>= 7;                                                                     \
-      }                                                                                            \
-      buf->buf[idx]                  = 0x80 | num;                                                 \
-      buf->buf[sizeof(buf->buf) - 1] &= 0x7f;                                                      \
-      buf->len                       = sizeof(buf->buf) - idx;                                     \
-      memmove(buf->buf, &buf->buf[idx], buf->len);                                                 \
-    } else {                                                                                       \
-      while (num > 127) {                                                                          \
+    while (num > 127) {                                                                            \
+      if (is_machine_litte_endian()) {                                                             \
         buf->buf[idx++] = 0x80 | ((uint8_t)num & 0x7f);                                            \
-        num             >>= 7;                                                                     \
+      } else {                                                                                     \
+        /* Read the highest byte in BE env is similar erad the lowest byte in LE env.              \
+         *                                                                                         \
+         * The shift operation in BE env is similar LE env, also multiple 2 or divide by 2.        \
+         * You may think the shift operation in BE is not intuitive, but you can think it          \
+         * compute then put the value to memory in BE layout(CPU compute put the register and      \
+         * memory in fact).                                                                        \
+         * \ref https://stackoverflow.com/a/7184905 */                                             \
+        buf->buf[idx++] = 0x80 | (((uint8_t *)&num)[index_] & 0x7f);                               \
       }                                                                                            \
-      buf->buf[idx] = num;                                                                         \
-      buf->len      = idx + 1;                                                                     \
+      num >>= 7;                                                                                   \
     }                                                                                              \
+    buf->buf[idx] = num;                                                                           \
+    buf->len      = idx + 1;                                                                       \
   }
 
-#define DEF_ENCODE_FUNC2_(bits_) DEF_ENCODE_FUNC_(bits_, uint##bits_##_t, kvarint_buf##bits_##_t)
+#define DEF_ENCODE_FUNC2_(index_, bits_)                                                           \
+  DEF_ENCODE_FUNC_(index_, bits_, uint##bits_##_t, kvarint_buf##bits_##_t)
 
 void kvarint_encode8(uint8_t num, kvarint_buf8_t *buf)
 {
@@ -47,9 +60,9 @@ void kvarint_encode8(uint8_t num, kvarint_buf8_t *buf)
 }
 
 // DEF_ENCODE_FUNC2_(8)
-DEF_ENCODE_FUNC2_(16)
-DEF_ENCODE_FUNC2_(32)
-DEF_ENCODE_FUNC2_(64)
+DEF_ENCODE_FUNC2_(1, 16)
+DEF_ENCODE_FUNC2_(3, 32)
+DEF_ENCODE_FUNC2_(7, 64)
 
 #define DEF_DECODE_FUNC_(bits_)                                                                    \
   kvarint_errcode_en                                                                               \
