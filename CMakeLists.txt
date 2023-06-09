@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(kvarint)
 
-add_library(kvarint STATIC kvarint.c)
+add_library(kvarint kvarint.c)
 
 include(GNUInstallDirs)
 message(STATUS "CMAKE_INSTALL_INCLUDEDIR: ${CMAKE_INSTALL_INCLUDEDIR}")
