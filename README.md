@@ -82,8 +82,8 @@ $ g++ -g -o test test.cc kvarint.c -lgtest -lgtest_main
 
 大端序的测试可以通过 `qemu` 或 `docker`[1] 进行虚拟环境的模拟：
 ```shell
-$ docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-$ docker run --rm -it s390x/ubuntu bash
+# docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+# docker run --rm -it s390x/ubuntu bash
 ```
 
 ## Reference
